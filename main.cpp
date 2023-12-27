@@ -70,7 +70,7 @@ LRESULT CALLBACK KeyboardProc(int nCode,
             } else if (vkCode == VK_SPACE) {
                 codepointStringBuffer.push_back(std::string(" "));
             } else if (vkCode == VK_CAPITAL) {
-                codepointStringBuffer.push_back(std::string("<VK_CAPITAL up>"));
+                codepointStringBuffer.push_back(std::string("<VK_CAPITAL down>"));
                 capsLockDown != capsLockDown;
             } else if (vkCode == VK_RETURN) {
                 codepointStringBuffer.push_back(std::string("<RETURN>\n"));
